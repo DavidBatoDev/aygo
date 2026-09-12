@@ -8,7 +8,7 @@ const webDir = fileURLToPath(new URL('.', import.meta.url))
 const serverDir = fileURLToPath(new URL('../server', import.meta.url))
 
 function parsePort(value: string | undefined, fallback: number): number {
-  const port = Number(value ?? fallback)
+  const port = Number(value?.trim() || fallback)
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error(`Invalid port: ${value}`)
   }
