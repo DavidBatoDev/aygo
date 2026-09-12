@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" fill="none" role="img" aria-labelledby="title">
+  <title id="title">Aygo shopping bag A icon</title>
+  <defs>
+    <mask id="bag-cutout" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="240">
+      <path fill="#fff" d="M0 0h200v240H0z"/>
+      <path fill="#000" d="m65 140-14 100h98l-14-100H65Z"/>
+      <path stroke="#000" stroke-width="8" d="M76 142v-10a24 24 0 0 1 48 0v10"/>
+      <circle cx="79" cy="155" r="5.5" fill="#fff"/>
+      <circle cx="121" cy="155" r="5.5" fill="#fff"/>
+    </mask>
+  </defs>
+  <path fill="#003CF5" mask="url(#bag-cutout)" d="M64 0h72l59 235h-46l-14-95H65l-14 95H5L64 0Z"/>
+</svg>

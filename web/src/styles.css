@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #eef3ff;
+  --color-brand-100: #dce6ff;
+  --color-brand-200: #b9ceff;
+  --color-brand-300: #87aaff;
+  --color-brand-400: #517bff;
+  --color-brand-500: #2455ff;
+  --color-brand-600: #003cf5;
+  --color-brand-700: #0030c7;
+  --color-brand-800: #062b9c;
+  --color-brand-900: #102b71;
+  --color-brand-950: #0a1740;
+
+  --color-ink-50: #f7f8fa;
+  --color-ink-100: #eceef2;
+  --color-ink-200: #dce0e8;
+  --color-ink-300: #b8c0ce;
+  --color-ink-400: #8c97aa;
+  --color-ink-500: #637088;
+  --color-ink-600: #4d5970;
+  --color-ink-700: #39445a;
+  --color-ink-800: #263147;
+  --color-ink-900: #172136;
+  --color-ink-950: #0c1425;
+
+  --color-lime-300: #dcff8e;
+  --color-lime-400: #c5f76b;
+  --color-lime-950: #20320b;
+  --color-canvas: #f7f8fa;
+  --color-surface: #ffffff;
+  --color-border: #dce0e8;
+  --color-content: #0c1425;
+  --color-muted: #4d5970;
+  --color-success: #166b46;
+  --color-success-soft: #eaf7ef;
+  --color-warning: #885409;
+  --color-warning-soft: #fff5d6;
+  --color-danger: #b42338;
+  --color-danger-soft: #fff0f2;
+
+  --font-sans: "Inter", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Arial Rounded MT Bold", "Inter", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --text-display: clamp(3.25rem, 8vw, 6.75rem);
+  --text-display--line-height: 0.98;
+  --text-display--letter-spacing: -0.065em;
+  --text-display--font-weight: 800;
+  --text-heading: clamp(2rem, 4vw, 3.5rem);
+  --text-heading--line-height: 1.08;
+  --text-heading--letter-spacing: -0.045em;
+  --text-heading--font-weight: 750;
+  --text-title: 1.5rem;
+  --text-title--line-height: 1.25;
+  --text-title--letter-spacing: -0.03em;
+  --text-title--font-weight: 700;
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.5;
+  --text-label--letter-spacing: 0.14em;
+  --text-label--font-weight: 700;
+
+  --radius-control: 0.875rem;
+  --radius-card: 1.5rem;
+  --radius-panel: 2rem;
+  --shadow-card: 0 2px 4px rgb(12 20 37 / 0.02), 0 12px 36px rgb(12 20 37 / 0.04);
+  --shadow-brand: 0 8px 24px rgb(0 60 245 / 0.2);
+  --ease-brand: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  body {
+    @apply m-0 min-w-80 bg-canvas font-sans text-content antialiased;
+  }
+
+  ::selection {
+    @apply bg-brand-100 text-brand-900;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-4 outline-brand-600;
+  }
+
+  button:not(:disabled), a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .brand-container {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12;
+  }
+
+  .brand-card {
+    @apply rounded-card border border-border bg-surface p-6 shadow-card sm:p-8;
+  }
+
+  .brand-eyebrow {
+    @apply text-label uppercase text-muted;
+  }
+
+  .brand-button {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-control px-5 py-3 text-sm font-semibold transition duration-200 ease-brand disabled:pointer-events-none disabled:opacity-45;
+  }
+
+  .brand-button-primary {
+    @apply bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+  }
+
+  .brand-button-secondary {
+    @apply border border-border bg-surface text-content hover:border-brand-200 hover:bg-brand-50 active:bg-brand-100;
+  }
+
+  .brand-button-accent {
+    @apply bg-lime-400 text-lime-950 hover:bg-lime-300;
+  }
+
+  .brand-input {
+    @apply min-h-12 w-full rounded-control border border-ink-400 bg-surface px-4 py-3 text-sm text-content placeholder:text-ink-500 focus-visible:border-brand-600 disabled:cursor-not-allowed disabled:bg-ink-100 disabled:text-muted;
+  }
+
+  .brand-input[aria-invalid="true"] {
+    @apply border-danger outline-danger;
+  }
+
+  .brand-badge {
+    @apply inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold;
+  }
+
+  .brand-badge-neutral {
+    @apply bg-ink-100 text-ink-700;
+  }
+
+  .brand-badge-success {
+    @apply bg-success-soft text-success;
+  }
+
+  .brand-badge-warning {
+    @apply bg-warning-soft text-warning;
+  }
+
+  .brand-badge-danger {
+    @apply bg-danger-soft text-danger;
+  }
+}

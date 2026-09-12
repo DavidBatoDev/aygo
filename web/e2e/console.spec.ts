@@ -1,0 +1,166 @@
+import { expect, test } from '@playwright/test'
+
+test('all eight screens render, image assets load, and layouts fit mobile', async ({ page }, info) => {
+  const errors: string[] = []
+  page.on('pageerror', e => errors.push(e.message))
+  const screens = [
+    ['/', 'A good day to make things happen.'], ['/catalogue', 'Good finds start here.'],
+    ['/inventory', 'Know what you can promise.'], ['/orders', 'From first hello to handoff.'],
+    ['/events', 'Bring the experience to life.'], ['/equipment', 'Ready for the next big thing.'],
+    ['/suppliers', 'Good work takes good partners.'], ['/calendar', 'Make space for what’s next.'],
+  ]
+  for (const [url, title] of screens) {
+    await page.goto(url)
+    await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible()
+    await page.evaluate(() => document.fonts.ready)
+    if (url === '/') {
+      await page.screenshot({ path: info.outputPath('overview-desktop.png'), fullPage: true })
+    }
+  }
+  await page.goto('/catalogue')
+  await expect(page.locator('.ops-product-card')).toHaveCount(33)
+  const images = page.locator('.ops-product-card img')
+  for (let i = 0; i < await images.count(); i++) {
+    await images.nth(i).scrollIntoViewIfNeeded()
+    await expect.poll(() => images.nth(i).evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true)
+  }
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await page.screenshot({ path: info.outputPath('catalogue-desktop.png'), fullPage: true })
+  await page.setViewportSize({ width: 390, height: 844 })
+  for (const [url] of screens) {
+    await page.goto(url)
+    await expect(page.locator('h1')).toBeVisible()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
+  }
+  await page.goto('/')
+  await page.screenshot({ path: info.outputPath('overview-mobile.png'), fullPage: true })
+  expect(errors).toEqual([])
+})
+
+test('resolve a real shortage and preserve it across navigation', async ({ page }) => {
+  await page.goto('/orders')
+  await page.getByRole('row').filter({ hasText: 'AY-2607' }).click()
+  let dialog = page.getByRole('dialog')
+  await expect(dialog.getByText('A little restocking is needed')).toBeVisible()
+  await dialog.getByRole('button', { name: /Polo shirt.*short 24/ }).click()
+  dialog = page.getByRole('dialog', { name: 'Adjust stock' })
+  await dialog.getByLabel('Quantity', { exact: true }).fill('24')
+  await dialog.getByRole('button', { name: 'Add to stock', exact: true }).click()
+  await expect(dialog.getByRole('status')).toHaveText('Add to stock')
+  await page.keyboard.press('Escape')
+  await page.getByRole('row').filter({ hasText: 'AY-2607' }).click()
+  await expect(page.getByText('A little restocking is needed')).toHaveCount(0)
+  await page.keyboard.press('Escape')
+  await page.getByRole('link', { name: 'Inventory', exact: true }).click()
+  await page.getByRole('textbox', { name: 'Search product, SKU or colour…' }).fill('polo')
+  await expect(page.getByRole('row').filter({ hasText: 'Navy / L' })).toContainText('80')
+})
+
+test('build a multi-line order and walk the full lifecycle in both directions', async ({ page }) => {
+  await page.goto('/orders')
+  await page.getByRole('button', { name: 'New order', exact: true }).click()
+  let dialog = page.getByRole('dialog')
+  await dialog.getByLabel('Client / company').fill('Presentation test client')
+  await dialog.getByLabel('Contact email').fill('demo@example.com')
+  await dialog.getByLabel('Quantity', { exact: true }).fill('20')
+  await dialog.getByRole('button', { name: 'Add line', exact: true }).click()
+  await dialog.getByLabel('Product', { exact: true }).selectOption({ label: 'Canvas tote bag' })
+  await dialog.getByLabel('Quantity', { exact: true }).fill('30')
+  await dialog.getByRole('button', { name: 'Add line', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Create order', exact: true }).click()
+  dialog = page.getByRole('dialog', { name: 'AY-2621' })
+  await expect(dialog).toContainText('Presentation test client')
+  await expect(dialog).toContainText('50 pieces')
+  for (const stage of ['quoted', 'approved', 'in production', 'ready', 'delivered']) {
+    await dialog.getByRole('button', { name: `Move to ${stage}`, exact: true }).click()
+  }
+  await expect(dialog.getByRole('button', { name: 'Back to ready' })).toBeVisible()
+  for (const stage of ['ready', 'in production', 'approved', 'quoted', 'inquiry']) {
+    await dialog.getByRole('button', { name: `Back to ${stage}`, exact: true }).click()
+  }
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('row').filter({ hasText: 'Presentation test client' })).toContainText('Inquiry')
+})
+
+test('create a product, plan an event, and complete an agenda entry', async ({ page }) => {
+  await page.goto('/catalogue')
+  await page.getByRole('button', { name: 'Add product', exact: true }).click()
+  let dialog = page.getByRole('dialog')
+  await dialog.getByLabel('Product name', { exact: true }).fill('Demo crew shirt')
+  await dialog.getByLabel('SKU', { exact: true }).fill('DEMO-SHIRT')
+  await dialog.getByLabel('Sell price (PHP)').fill('250')
+  await dialog.getByRole('button', { name: 'Add product', exact: true }).click()
+  await expect(page.getByRole('dialog', { name: 'Demo crew shirt' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await page.getByRole('link', { name: /^Events/ }).click()
+  await page.getByRole('row').filter({ hasText: 'FSI executive summit' }).click()
+  dialog = page.getByRole('dialog')
+  await expect(dialog.getByText(/Overlaps OutSystems/).first()).toBeVisible()
+  await dialog.getByLabel('Person', { exact: true }).fill('Alex Demo')
+  await dialog.getByRole('button', { name: 'Add crew member' }).click()
+  await expect(dialog.getByText('Alex Demo', { exact: true })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: 'New event', exact: true }).click()
+  dialog = page.getByRole('dialog')
+  await dialog.getByLabel('Event name').fill('Demo launch day')
+  await dialog.getByLabel('Client / company').fill('Demo client')
+  await dialog.getByLabel('Venue', { exact: true }).fill('Manila studio')
+  await dialog.getByRole('button', { name: 'Create event' }).click()
+  await expect(page.getByRole('dialog', { name: 'Demo launch day' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await page.getByRole('link', { name: 'Calendar', exact: true }).click()
+  await page.getByRole('button', { name: 'Add agenda entry', exact: true }).click()
+  dialog = page.getByRole('dialog')
+  await dialog.getByLabel('What’s happening?').fill('Presentation follow-up')
+  await dialog.getByRole('button', { name: 'Add agenda entry', exact: true }).click()
+  const entry = dialog.locator('.ops-day-entry').filter({ hasText: 'Presentation follow-up' })
+  await entry.getByRole('button', { name: 'Done', exact: true }).click()
+  await expect(entry.getByRole('button', { name: 'Reopen', exact: true })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await page.getByRole('button', { name: 'Reset demo', exact: true }).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Reset demo', exact: true }).click()
+  await page.getByRole('link', { name: 'Catalogue', exact: true }).click()
+  await expect(page.locator('.ops-product-card')).toHaveCount(33)
+})
+
+test('search across records, add a colour, and change stock policy', async ({ page }) => {
+  await page.goto('/')
+  await page.keyboard.press('Control+k')
+  await page.getByRole('dialog').getByRole('textbox').fill('Thermos')
+  await page.getByRole('button', { name: /Thermos tumbler.*Product/ }).click()
+  let dialog = page.getByRole('dialog', { name: 'Thermos tumbler' })
+  await dialog.getByLabel('Colour', { exact: true }).selectOption('Pink')
+  await dialog.getByRole('button', { name: 'Add a colour', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Adjust Pink stock', exact: true }).click()
+  dialog = page.getByRole('dialog', { name: 'Adjust stock' })
+  await dialog.getByLabel('Minimum free stock').fill('50')
+  await dialog.getByRole('button', { name: 'Save reorder point' }).click()
+  await dialog.getByRole('button', { name: 'Deduct', exact: true }).click()
+  await dialog.getByLabel('Quantity', { exact: true }).fill('1')
+  await expect(dialog.getByRole('button', { name: 'Deduct from stock' })).toBeDisabled()
+  await expect(dialog.getByText(/On hand cannot go below zero/)).toBeVisible()
+  await dialog.getByRole('button', { name: 'Received', exact: true }).click()
+  await dialog.getByLabel('Quantity', { exact: true }).fill('60')
+  await dialog.getByRole('button', { name: 'Add to stock', exact: true }).click()
+  await expect(dialog.getByText('Healthy', { exact: true })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
+test('equipment maintenance and gear assignments update availability', async ({ page }) => {
+  await page.goto('/equipment')
+  let row = page.getByRole('row').filter({ hasText: 'Stage lighting kit' })
+  await expect(row).toContainText('In maintenance')
+  await row.getByRole('button', { name: 'Return to pool' }).click()
+  await expect(row).toContainText('Available')
+  await page.getByRole('link', { name: 'Events', exact: true }).click()
+  await page.getByRole('row').filter({ hasText: 'Business beyond boundaries' }).click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByRole('checkbox', { name: /Stage lighting kit/ }).check()
+  await page.keyboard.press('Escape')
+  await page.getByRole('link', { name: 'Equipment', exact: true }).click()
+  row = page.getByRole('row').filter({ hasText: 'Stage lighting kit' })
+  await expect(row).toContainText('Out on site')
+  await row.getByRole('button', { name: 'Send to maintenance' }).click()
+  await expect(row).toContainText('In maintenance')
+})

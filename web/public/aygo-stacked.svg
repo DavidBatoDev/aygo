@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 480" fill="none" role="img" aria-labelledby="title">
+  <title id="title">Aygo stacked logo</title>
+  <defs>
+    <mask id="icon-bag" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="240">
+      <path fill="#fff" d="M0 0h200v240H0z"/>
+      <path fill="#000" d="m65 140-14 100h98l-14-100H65Z"/>
+      <path stroke="#000" stroke-width="8" d="M76 142v-10a24 24 0 0 1 48 0v10"/>
+      <circle cx="79" cy="155" r="5.5" fill="#fff"/>
+      <circle cx="121" cy="155" r="5.5" fill="#fff"/>
+    </mask>
+  </defs>
+  <g fill="#003CF5">
+    <path transform="translate(110 12) scale(1.1)" mask="url(#icon-bag)" d="M64 0h72l59 235h-46l-14-95H65l-14 95H5L64 0Z"/>
+    <g transform="translate(0 310)">
+      <path fill-rule="evenodd" d="M73 29v-7h29v88H73v-9c-7 8-16 12-29 12C19 113 1 93 1 67S19 19 45 19c12 0 21 4 28 10ZM52 44c-12 0-20 9-20 22s8 22 20 22 20-9 20-22-8-22-20-22Z" clip-rule="evenodd"/>
+      <path d="M101 22h32l25 44 22-44h33l-68 131h-33l29-55-40-76Z"/>
+      <path fill-rule="evenodd" d="M268 29v-7h30v84c0 33-20 50-49 50-20 0-35-8-45-24l25-13c5 8 11 12 20 12 13 0 20-7 20-22v-7c-7 7-16 11-28 11-25 0-43-20-43-46s18-48 44-48c11 0 20 4 26 10Zm-18 15c-12 0-20 9-20 22s8 22 20 22 20-9 20-22-8-22-20-22Z" clip-rule="evenodd"/>
+      <path fill-rule="evenodd" d="M349 19c29 0 50 20 50 47s-21 47-50 47-50-20-50-47 21-47 50-47Zm0 25c-12 0-20 9-20 22s8 22 20 22 20-9 20-22-8-22-20-22Z" clip-rule="evenodd"/>
+      <circle cx="416" cy="95" r="18"/>
+    </g>
+  </g>
+</svg>
